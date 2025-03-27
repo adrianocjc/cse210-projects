@@ -1,121 +1,138 @@
 using System;
 using System.Collections.Generic;
 
-class Product
+class Address
 {
-    public string ProductName { get; set; }
-    public decimal Price { get; set; }
-    public int StockQuantity { get; set; }
-    public string Description { get; set; }
+    private string _street;
+    private string _city;
+    private string _zipCode;
 
-    public void UpdateStock(int amount)
+    public Address(string street, string city, string zipCode)
     {
-        StockQuantity += amount;
-        Console.WriteLine($"Stock updated. New stock quantity for {ProductName}: {StockQuantity}");
+        _street = street;
+        _city = city;
+        _zipCode = zipCode;
     }
 
-    public void ApplyDiscount(decimal discountPercentage)
+    public string GetFullAddress()
     {
-        Price -= Price * discountPercentage / 100;
-        Console.WriteLine($"Discount applied. New price for {ProductName}: {Price:C}");
-    }
-
-    public void GetDetails()
-    {
-        Console.WriteLine($"Product: {ProductName}\nPrice: {Price:C}\nStock: {StockQuantity}\nDescription: {Description}");
+        return $"{_street}, {_city}, {_zipCode}";
     }
 }
 
-class Order
+class Product
 {
-    public int OrderID { get; set; }
-    public List<Product> Products { get; set; } = new List<Product>();
-    public decimal TotalAmount { get; private set; }
-    public string Status { get; set; } = "Pending";
+    private string _productName;
+    private decimal _price;
+    private int _stockQuantity;
 
-    public void AddProduct(Product product)
+    public Product(string productName, decimal price, int stockQuantity)
     {
-        Products.Add(product);
-        Console.WriteLine($"Added {product.ProductName} to order {OrderID}");
-        CalculateTotal();
+        _productName = productName;
+        _price = price;
+        _stockQuantity = stockQuantity;
     }
 
-    public void RemoveProduct(Product product)
+    public string GetDetails()
     {
-        Products.Remove(product);
-        Console.WriteLine($"Removed {product.ProductName} from order {OrderID}");
-        CalculateTotal();
+        return $"Product: {_productName}, Price: {_price:C}, Stock: {_stockQuantity}";
     }
 
-    public void CalculateTotal()
+    public decimal GetPrice()
     {
-        TotalAmount = 0;
-        foreach (var product in Products)
-        {
-            TotalAmount += product.Price;
-        }
-        Console.WriteLine($"Order {OrderID} total amount: {TotalAmount:C}");
-    }
-
-    public void TrackOrder()
-    {
-        Console.WriteLine($"Order {OrderID} is currently: {Status}");
+        return _price;
     }
 }
 
 class Customer
 {
-    public string Name { get; set; }
-    public string Address { get; set; }
-    public string ContactInfo { get; set; }
-    public string PaymentInfo { get; set; }
-    public List<Order> Orders { get; set; } = new List<Order>();
+    private string _name;
+    private Address _address;
+    private string _contactInfo;
 
-    public void UpdateDetails(string name, string address, string contactInfo)
+    public Customer(string name, Address address, string contactInfo)
     {
-        Name = name;
-        Address = address;
-        ContactInfo = contactInfo;
-        Console.WriteLine("Customer details updated.");
+        _name = name;
+        _address = address;
+        _contactInfo = contactInfo;
     }
 
-    public void AddPaymentInfo(string paymentInfo)
+    public string GetName()
     {
-        PaymentInfo = paymentInfo;
-        Console.WriteLine("Payment information updated.");
+        return _name;
     }
 
-    public void ViewOrders()
+    public string GetContactInfo()
     {
-        Console.WriteLine($"Orders for {Name}:");
-        foreach (var order in Orders)
+        return _contactInfo;
+    }
+
+    public string GetShippingAddress()
+    {
+        return _address.GetFullAddress();
+    }
+}
+
+class Order
+{
+    private int _orderID;
+    private List<Product> _products = new List<Product>();
+    private Customer _customer;
+
+    public Order(int orderID, Customer customer)
+    {
+        _orderID = orderID;
+        _customer = customer;
+    }
+
+    public void AddProduct(Product product)
+    {
+        _products.Add(product);
+    }
+
+    public decimal CalculateTotal()
+    {
+        decimal total = 0;
+        foreach (var product in _products)
         {
-            Console.WriteLine($"- Order ID: {order.OrderID}, Total: {order.TotalAmount:C}, Status: {order.Status}");
+            total += product.GetPrice();
         }
+        return total;
+    }
+
+    public string GetPackingLabel()
+    {
+        return $"Packing Label:\nOrder ID: {_orderID}\nCustomer: {_customer.GetName()}\nProducts:\n{string.Join("\n", _products.ConvertAll(p => p.GetDetails()))}";
+    }
+
+    public string GetShippingLabel()
+    {
+        return $"Shipping Label:\n{_customer.GetName()}\n{_customer.GetShippingAddress()}\nContact: {_customer.GetContactInfo()}";
     }
 }
 
 class Payment
 {
-    public string PaymentType { get; set; }
-    public string TransactionID { get; set; }
-    public string Status { get; set; } = "Unprocessed";
+    private string _paymentType;
+    private string _transactionID;
+    private string _status;
+
+    public Payment(string paymentType, string transactionID)
+    {
+        _paymentType = paymentType;
+        _transactionID = transactionID;
+        _status = "Unprocessed";
+    }
 
     public void ProcessPayment(decimal amount)
     {
-        Status = "Processed";
-        Console.WriteLine($"Payment of {amount:C} processed via {PaymentType}. Transaction ID: {TransactionID}");
+        _status = "Processed";
+        Console.WriteLine($"Payment of {amount:C} processed via {_paymentType}. Transaction ID: {_transactionID}");
     }
 
-    public void Refund()
+    public string GetPaymentStatus()
     {
-        Status = "Refunded";
-        Console.WriteLine($"Payment with Transaction ID: {TransactionID} has been refunded.");
-    }
-
-    public void ValidatePayment()
-    {
-        Console.WriteLine($"Payment status: {Status}");
+        return _status;
     }
 }
 
@@ -123,23 +140,42 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Example usage
-        var product1 = new Product { ProductName = "Laptop", Price = 1000m, StockQuantity = 10, Description = "High-performance laptop." };
-        var product2 = new Product { ProductName = "Mouse", Price = 20m, StockQuantity = 50, Description = "Wireless mouse." };
+        // Create Address Objects
+        var address1 = new Address("123 Main St", "Parnamirim", "59150-000");
+        var address2 = new Address("456 Elm St", "Natal", "59020-300");
 
-        var customer = new Customer { Name = "Adriano", Address = "123 Main St", ContactInfo = "adriano@example.com" };
-        customer.AddPaymentInfo("Credit Card");
+        // Create Customer Objects
+        var customer1 = new Customer("Adriano", address1, "adriano@example.com");
+        var customer2 = new Customer("Maria", address2, "maria@example.com");
 
-        var order = new Order { OrderID = 1 };
-        order.AddProduct(product1);
-        order.AddProduct(product2);
-        order.TrackOrder();
+        // Create Product Objects
+        var product1 = new Product("Laptop", 1500m, 10);
+        var product2 = new Product("Mouse", 20m, 50);
+        var product3 = new Product("Keyboard", 30m, 25);
 
-        customer.Orders.Add(order);
-        customer.ViewOrders();
+        // Create Order Objects
+        var order1 = new Order(1, customer1);
+        order1.AddProduct(product1);
+        order1.AddProduct(product2);
 
-        var payment = new Payment { PaymentType = "Credit Card", TransactionID = "TXN12345" };
-        payment.ProcessPayment(order.TotalAmount);
-        payment.ValidatePayment();
+        var order2 = new Order(2, customer2);
+        order2.AddProduct(product3);
+        order2.AddProduct(product2);
+
+        // Process Orders
+        Console.WriteLine(order1.GetPackingLabel());
+        Console.WriteLine(order1.GetShippingLabel());
+        Console.WriteLine($"Total Cost: {order1.CalculateTotal():C}\n");
+
+        Console.WriteLine(order2.GetPackingLabel());
+        Console.WriteLine(order2.GetShippingLabel());
+        Console.WriteLine($"Total Cost: {order2.CalculateTotal():C}\n");
+
+        // Process Payments
+        var payment1 = new Payment("Credit Card", "TXN1001");
+        payment1.ProcessPayment(order1.CalculateTotal());
+
+        var payment2 = new Payment("PayPal", "TXN1002");
+        payment2.ProcessPayment(order2.CalculateTotal());
     }
 }

@@ -1,152 +1,92 @@
 using System;
 using System.Collections.Generic;
 
+// Comment Class
+class Comment
+{
+    public string Name { get; set; }
+    public string Text { get; set; }
+
+    public Comment(string name, string text)
+    {
+        Name = name;
+        Text = text;
+    }
+}
+
+// Video Class
 class Video
 {
     public string Title { get; set; }
-    public TimeSpan Duration { get; set; }
-    public int Views { get; set; }
-    public DateTime UploadDate { get; set; }
-    public string Description { get; set; }
+    public string Author { get; set; }
+    public TimeSpan Length { get; set; }
+    private List<Comment> Comments { get; set; } = new List<Comment>();
 
-    public void Play()
+    public Video(string title, string author, TimeSpan length)
     {
-        Console.WriteLine($"Playing video: {Title}");
+        Title = title;
+        Author = author;
+        Length = length;
     }
 
-    public void Pause()
+    public void AddComment(Comment comment)
     {
-        Console.WriteLine($"Pausing video: {Title}");
+        Comments.Add(comment);
     }
 
-    public void Like()
+    public int GetCommentCount()
     {
-        Console.WriteLine($"Liked video: {Title}");
+        return Comments.Count;
     }
 
-    public void Share()
+    public void DisplayDetails()
     {
-        Console.WriteLine($"Sharing video: {Title}");
-    }
-}
+        Console.WriteLine($"Title: {Title}");
+        Console.WriteLine($"Author: {Author}");
+        Console.WriteLine($"Length: {Length}");
+        Console.WriteLine($"Number of Comments: {GetCommentCount()}");
 
-class Category
-{
-    public string CategoryName { get; set; }
-    public List<Video> Videos { get; set; } = new List<Video>();
-
-    public void AddVideo(Video video)
-    {
-        Videos.Add(video);
-        Console.WriteLine($"Added video: {video.Title} to category: {CategoryName}");
-    }
-
-    public void RemoveVideo(Video video)
-    {
-        Videos.Remove(video);
-        Console.WriteLine($"Removed video: {video.Title} from category: {CategoryName}");
-    }
-
-    public void ListVideos()
-    {
-        Console.WriteLine($"Videos in category: {CategoryName}");
-        foreach (var video in Videos)
+        Console.WriteLine("Comments:");
+        foreach (var comment in Comments)
         {
-            Console.WriteLine($"- {video.Title}");
+            Console.WriteLine($"- {comment.Name}: {comment.Text}");
         }
     }
 }
 
-class Playlist
-{
-    public string PlaylistName { get; set; }
-    public List<Video> VideoList { get; set; } = new List<Video>();
-
-    public void AddVideo(Video video)
-    {
-        VideoList.Add(video);
-        Console.WriteLine($"Added video: {video.Title} to playlist: {PlaylistName}");
-    }
-
-    public void RemoveVideo(Video video)
-    {
-        VideoList.Remove(video);
-        Console.WriteLine($"Removed video: {video.Title} from playlist: {PlaylistName}");
-    }
-
-    public void PlayAll()
-    {
-        Console.WriteLine($"Playing all videos in playlist: {PlaylistName}");
-        foreach (var video in VideoList)
-        {
-            video.Play();
-        }
-    }
-}
-
-class User
-{
-    public string Username { get; set; }
-    public List<Playlist> SavedPlaylists { get; set; } = new List<Playlist>();
-    public List<Video> WatchHistory { get; set; } = new List<Video>();
-
-    public void CreatePlaylist(string name)
-    {
-        SavedPlaylists.Add(new Playlist { PlaylistName = name });
-        Console.WriteLine($"Created playlist: {name}");
-    }
-
-    public void SaveVideo(Video video)
-    {
-        WatchHistory.Add(video);
-        Console.WriteLine($"Saved video: {video.Title} to watch history");
-    }
-
-    public void ViewHistory()
-    {
-        Console.WriteLine($"Watch history for user: {Username}");
-        foreach (var video in WatchHistory)
-        {
-            Console.WriteLine($"- {video.Title}");
-        }
-    }
-}
-
+// Main Program
 class Program
 {
     static void Main(string[] args)
     {
-        var video1 = new Video
+        // Create Video Objects
+        var video1 = new Video("Introduction to C#", "Adriano", TimeSpan.FromMinutes(10));
+        var video2 = new Video("Advanced C# Techniques", "Adriano", TimeSpan.FromMinutes(20));
+        var video3 = new Video("C# Design Patterns", "Adriano", TimeSpan.FromMinutes(15));
+
+        // Add Comments to Video 1
+        video1.AddComment(new Comment("Alice", "Great video!"));
+        video1.AddComment(new Comment("Bob", "Very helpful, thanks!"));
+        video1.AddComment(new Comment("Charlie", "Learned a lot!"));
+
+        // Add Comments to Video 2
+        video2.AddComment(new Comment("Alice", "Amazing content!"));
+        video2.AddComment(new Comment("Daisy", "Loved the explanation."));
+        video2.AddComment(new Comment("Eve", "Looking forward to more!"));
+
+        // Add Comments to Video 3
+        video3.AddComment(new Comment("Frank", "Awesome examples."));
+        video3.AddComment(new Comment("Grace", "Best explanation I've seen!"));
+        video3.AddComment(new Comment("Helen", "Perfect for beginners."));
+
+        // Store Videos in a List
+        var videos = new List<Video> { video1, video2, video3 };
+
+        // Display Details for Each Video
+        foreach (var video in videos)
         {
-            Title = "Introduction to C#",
-            Duration = TimeSpan.FromMinutes(10),
-            Views = 1000,
-            UploadDate = DateTime.Now,
-            Description = "Learn the basics of C#."
-        };
-
-        var video2 = new Video
-        {
-            Title = "Advanced C# Techniques",
-            Duration = TimeSpan.FromMinutes(20),
-            Views = 500,
-            UploadDate = DateTime.Now,
-            Description = "Explore advanced concepts in C#."
-        };
-
-        var category = new Category { CategoryName = "Programming Tutorials" };
-        category.AddVideo(video1);
-        category.AddVideo(video2);
-        category.ListVideos();
-
-        var playlist = new Playlist { PlaylistName = "C# Learning" };
-        playlist.AddVideo(video1);
-        playlist.AddVideo(video2);
-        playlist.PlayAll();
-
-        var user = new User { Username = "Adriano" };
-        user.CreatePlaylist("Favorites");
-        user.SaveVideo(video1);
-        user.ViewHistory();
+            video.DisplayDetails();
+            Console.WriteLine();
+        }
     }
 }

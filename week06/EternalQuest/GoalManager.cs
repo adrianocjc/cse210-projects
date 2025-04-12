@@ -4,24 +4,13 @@ using System.IO;
 
 public class GoalManager
 {
-    private List<Goal> _goals; // List to store all goals
-    private int _score; // Track the user's score
-    private int _level; // Track the user's level
-    private List<string> _eventHistory; // History of recorded events
-    private Dictionary<int, string> _achievements; // Dictionary for achievements
+    private List<Goal> _goals;
+    private int _score;
 
     public GoalManager()
     {
         _goals = new List<Goal>();
         _score = 0;
-        _level = 1;
-        _eventHistory = new List<string>();
-        _achievements = new Dictionary<int, string>
-        {
-            { 1000, "Bronze Achievement" },
-            { 5000, "Silver Achievement" },
-            { 10000, "Gold Achievement" }
-        };
     }
 
     public void Start()
@@ -35,10 +24,9 @@ public class GoalManager
             Console.WriteLine("2. List Goals");
             Console.WriteLine("3. Create Goal");
             Console.WriteLine("4. Record Event");
-            Console.WriteLine("5. View Event History");
-            Console.WriteLine("6. Save Goals");
-            Console.WriteLine("7. Load Goals");
-            Console.WriteLine("8. Quit");
+            Console.WriteLine("5. Save Goals");
+            Console.WriteLine("6. Load Goals");
+            Console.WriteLine("7. Quit");
             Console.Write("Choose an option: ");
             string input = Console.ReadLine();
 
@@ -57,15 +45,12 @@ public class GoalManager
                     RecordEvent();
                     break;
                 case "5":
-                    ViewEventHistory();
-                    break;
-                case "6":
                     SaveGoals();
                     break;
-                case "7":
+                case "6":
                     LoadGoals();
                     break;
-                case "8":
+                case "7":
                     quit = true;
                     break;
                 default:
@@ -79,37 +64,20 @@ public class GoalManager
     {
         Console.WriteLine($"\nPlayer Info:");
         Console.WriteLine($"Score: {_score}");
-        Console.WriteLine($"Level: {_level}");
-
-        Console.WriteLine("Achievements Earned:");
-        foreach (var achievement in _achievements)
-        {
-            if (_score >= achievement.Key)
-            {
-                Console.WriteLine($"- {achievement.Value}");
-            }
-        }
     }
 
     private void ListGoals()
     {
         Console.WriteLine("\nYour Goals:");
-        if (_goals.Count == 0)
+        foreach (var goal in _goals)
         {
-            Console.WriteLine("No goals available.");
-        }
-        else
-        {
-            foreach (var goal in _goals)
-            {
-                Console.WriteLine(goal.GetDetailsString());
-            }
+            Console.WriteLine(goal.GetDetailsString());
         }
     }
 
     private void CreateGoal()
     {
-        Console.WriteLine("\n1. Simple Goal\n2. Eternal Goal\n3. Checklist Goal\n4. Negative Goal");
+        Console.WriteLine("\n1. Simple Goal\n2. Eternal Goal\n3. Checklist Goal");
         Console.Write("Select Goal Type: ");
         string type = Console.ReadLine();
 
@@ -117,7 +85,7 @@ public class GoalManager
         string name = Console.ReadLine();
         Console.Write("Enter Description: ");
         string description = Console.ReadLine();
-        Console.Write("Enter Points (negative for negative goals): ");
+        Console.Write("Enter Points: ");
         int points = int.Parse(Console.ReadLine());
 
         switch (type)
@@ -134,9 +102,6 @@ public class GoalManager
                 Console.Write("Enter Bonus Points: ");
                 int bonus = int.Parse(Console.ReadLine());
                 _goals.Add(new ChecklistGoal(name, description, points, target, bonus));
-                break;
-            case "4":
-                _goals.Add(new NegativeGoal(name, description, points));
                 break;
             default:
                 Console.WriteLine("Invalid Goal Type.");
@@ -160,29 +125,10 @@ public class GoalManager
             Goal selectedGoal = _goals[index];
             selectedGoal.RecordEvent();
             _score += selectedGoal._points;
-            _eventHistory.Add($"Recorded '{selectedGoal._shortName}' on {DateTime.Now}");
-            MotivationalQuotes.DisplayRandomQuote();
-            UpdateLevel();
         }
         else
         {
             Console.WriteLine("Invalid selection. Please choose a valid goal.");
-        }
-    }
-
-    private void ViewEventHistory()
-    {
-        Console.WriteLine("\nEvent History:");
-        if (_eventHistory.Count == 0)
-        {
-            Console.WriteLine("No events recorded yet.");
-        }
-        else
-        {
-            foreach (var record in _eventHistory)
-            {
-                Console.WriteLine(record);
-            }
         }
     }
 
@@ -191,33 +137,22 @@ public class GoalManager
         using (StreamWriter writer = new StreamWriter("goals.txt"))
         {
             writer.WriteLine(_score);
-            writer.WriteLine(_level);
             foreach (var goal in _goals)
             {
                 writer.WriteLine(goal.GetStringRepresentation());
             }
-
-            writer.WriteLine("EventHistory:");
-            foreach (var record in _eventHistory)
-            {
-                writer.WriteLine(record);
-            }
         }
-
-        Console.WriteLine("Goals and Event History Saved Successfully.");
+        Console.WriteLine("Goals Saved Successfully.");
     }
 
     private void LoadGoals()
     {
         _goals.Clear();
-        _eventHistory.Clear();
 
         string[] lines = File.ReadAllLines("goals.txt");
         _score = int.Parse(lines[0]);
-        _level = int.Parse(lines[1]);
 
-        int i = 2;
-        while (i < lines.Length && lines[i] != "EventHistory:")
+        for (int i = 1; i < lines.Length; i++)
         {
             string[] parts = lines[i].Split(":");
             string type = parts[0];
@@ -235,23 +170,7 @@ public class GoalManager
             {
                 _goals.Add(new ChecklistGoal(details[0], details[1], int.Parse(details[2]), int.Parse(details[3]), int.Parse(details[4])));
             }
-            else if (type == "NegativeGoal")
-            {
-                _goals.Add(new NegativeGoal(details[0], details[1], int.Parse(details[2])));
-            }
-            i++;
         }
-
-        for (int j = i + 1; j < lines.Length; j++)
-        {
-            _eventHistory.Add(lines[j]);
-        }
-
-        Console.WriteLine("Goals and Event History Loaded Successfully.");
-    }
-
-    private void UpdateLevel()
-    {
-        _level = (_score / 1000) + 1;
+        Console.WriteLine("Goals Loaded Successfully.");
     }
 }

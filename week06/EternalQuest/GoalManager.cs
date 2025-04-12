@@ -69,9 +69,16 @@ public class GoalManager
     private void ListGoals()
     {
         Console.WriteLine("\nYour Goals:");
-        foreach (var goal in _goals)
+        if (_goals.Count == 0)
         {
-            Console.WriteLine(goal.GetDetailsString());
+            Console.WriteLine("No goals available.");
+        }
+        else
+        {
+            foreach (var goal in _goals)
+            {
+                Console.WriteLine(goal.GetDetailsString());
+            }
         }
     }
 
@@ -124,7 +131,7 @@ public class GoalManager
         {
             Goal selectedGoal = _goals[index];
             selectedGoal.RecordEvent();
-            _score += selectedGoal._points;
+            _score += selectedGoal.Points; // Use Points property for encapsulated access
         }
         else
         {

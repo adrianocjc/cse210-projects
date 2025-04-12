@@ -11,6 +11,12 @@ public abstract class Goal
         _points = points;
     }
 
+    // Public property to expose _points safely
+    public int Points
+    {
+        get { return _points; }
+    }
+
     public abstract void RecordEvent();
     public abstract bool IsComplete();
     public abstract string GetDetailsString();
